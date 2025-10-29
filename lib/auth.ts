@@ -5,9 +5,13 @@ import { db } from './db';
 import { users } from './db/schema';
 import { eq } from 'drizzle-orm';
 
+// NextAuth automatically reads NEXTAUTH_URL from environment variables
+// On Vercel, you can either:
+// 1. Set NEXTAUTH_URL explicitly in Vercel env vars, OR
+// 2. Let it auto-detect (works in most cases, but explicit is more reliable)
+// For local dev: keep NEXTAUTH_URL=http://localhost:3000 in .env
+
 export const authOptions: NextAuthOptions = {
-  // Explicitly set the URL for production
-  url: process.env.NEXTAUTH_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined),
   providers: [
     CredentialsProvider({
       name: 'Credentials',
