@@ -1,0 +1,224 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { FiArrowLeft, FiUpload } from 'react-icons/fi';
+import toast from 'react-hot-toast';
+
+export default function NewProductPage() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: '',
+    quantity: '',
+    category: '',
+    image: null as File | null,
+  });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.image) {
+      toast.error('Please select an image');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('price', formData.price);
+      formDataToSend.append('quantity', formData.quantity);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('image', formData.image);
+
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create product');
+      }
+
+      toast.success('Product created successfully!');
+      router.push('/admin/products');
+    } catch (error) {
+      toast.error('Failed to create product');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Header */}
+      <div className="flex items-center space-x-4 mb-8">
+        <Link
+          href="/admin/products"
+          className="text-gray-600 hover:text-gray-800 transition"
+        >
+          <FiArrowLeft className="text-2xl" />
+        </Link>
+        <div>
+          <h1 className="text-4xl font-bold text-gray-800">Add New Product</h1>
+          <p className="text-gray-600 mt-1">Fill in the details to add a new product</p>
+        </div>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-8">
+        <div className="space-y-6">
+          {/* Product Name */}
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              Product Name *
+            </label>
+            <input
+              id="name"
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="Enter product name"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              Description *
+            </label>
+            <textarea
+              id="description"
+              required
+              rows={4}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="Enter product description"
+            />
+          </div>
+
+          {/* Price and Quantity */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
+                Price (USD) *
+              </label>
+              <input
+                id="price"
+                type="number"
+                step="0.01"
+                min="0"
+                required
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="0.00"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-2">
+                Quantity *
+              </label>
+              <input
+                id="quantity"
+                type="number"
+                min="0"
+                required
+                value={formData.quantity}
+                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          {/* Category */}
+          <div>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+              Category *
+            </label>
+            <input
+              id="category"
+              type="text"
+              required
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="e.g., Vapes, Papers, Accessories"
+            />
+          </div>
+
+          {/* Image Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Product Image *
+            </label>
+            <div className="flex items-center space-x-4">
+              <label className="flex-1 flex flex-col items-center px-4 py-6 bg-white border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                <FiUpload className="text-4xl text-gray-400 mb-2" />
+                <span className="text-sm text-gray-600">Click to upload image</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  required
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </label>
+              {imagePreview && (
+                <div className="w-32 h-32 relative rounded-lg overflow-hidden border-2 border-gray-300">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex space-x-4 mt-8">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3 rounded-lg font-semibold hover:from-primary-600 hover:to-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? 'Creating...' : 'Create Product'}
+          </button>
+          <Link
+            href="/admin/products"
+            className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+          >
+            Cancel
+          </Link>
+        </div>
+      </form>
+    </div>
+  );
+}
+
