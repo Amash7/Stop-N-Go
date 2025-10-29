@@ -37,7 +37,7 @@ export default function ProductsPage() {
       setProducts(data.products);
       
       // Extract unique categories
-      const uniqueCategories = [...new Set(data.products.map((p: Product) => p.category))];
+      const uniqueCategories = [...new Set(data.products.map((p: Product) => p.category))] as string[];
       setCategories(uniqueCategories);
     } catch (error) {
       console.error('Error fetching products:', error);
