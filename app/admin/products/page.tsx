@@ -43,7 +43,8 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/products');
+      // Use admin endpoint to get ALL products (including inactive)
+      const response = await fetch('/api/admin/products');
       const data = await response.json();
       setProducts(data.products);
     } catch (error) {
@@ -65,14 +66,23 @@ export default function AdminProductsPage() {
         method: 'DELETE',
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to delete product');
+        throw new Error(data.error || 'Failed to delete product');
       }
 
-      toast.success('Product deleted successfully');
+      // Handle soft delete vs hard delete
+      if (data.deactivated) {
+        toast.success('Product deactivated (preserved for order history)');
+      } else {
+        toast.success('Product deleted successfully');
+      }
+
       fetchProducts();
     } catch (error) {
-      toast.error('Failed to delete product');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete product';
+      toast.error(errorMessage);
     } finally {
       setDeletingId(null);
     }
@@ -128,18 +138,23 @@ export default function AdminProductsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
-            <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
+            <div key={product.id} className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition ${!product.isActive ? 'border-2 border-red-300 bg-gray-50' : ''}`}>
               {/* Product Image */}
               <div className="relative h-48 bg-gray-100">
                 <Image
                   src={product.imageUrl}
                   alt={product.name}
                   fill
-                  className="object-cover"
+                  className={`object-cover ${!product.isActive ? 'opacity-50' : ''}`}
                 />
                 <div className="absolute top-3 right-3 bg-secondary-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
                   {product.category}
                 </div>
+                {!product.isActive && (
+                  <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    Inactive
+                  </div>
+                )}
               </div>
 
               {/* Product Info */}

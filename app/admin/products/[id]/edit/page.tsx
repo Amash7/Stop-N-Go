@@ -19,6 +19,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
     category: '',
     image: null as File | null,
     currentImageUrl: '',
+    isActive: true,
   });
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
           category: data.product.category,
           image: null,
           currentImageUrl: data.product.imageUrl,
+          isActive: data.product.isActive ?? true,
         });
         setImagePreview(data.product.imageUrl);
       }
@@ -73,6 +75,7 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
       formDataToSend.append('price', formData.price);
       formDataToSend.append('quantity', formData.quantity);
       formDataToSend.append('category', formData.category);
+      formDataToSend.append('isActive', formData.isActive.toString());
       
       if (formData.image) {
         formDataToSend.append('image', formData.image);
@@ -229,6 +232,28 @@ export default function EditProductPage({ params }: { params: { id: string } }) 
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Active Status */}
+          <div>
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+              />
+              <div>
+                <span className="block text-sm font-medium text-gray-700">
+                  Active Status
+                </span>
+                <span className="text-xs text-gray-500">
+                  {formData.isActive 
+                    ? 'Product is visible to customers' 
+                    : 'Product is hidden from customers (inactive)'}
+                </span>
+              </div>
+            </label>
           </div>
         </div>
 
