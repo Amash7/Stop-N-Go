@@ -6,6 +6,8 @@ import { orders, orderItems, products } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { generateOrderNumber } from '@/lib/utils';
 
+export const dynamic = 'force-dynamic';
+
 // GET orders
 export async function GET(req: Request) {
   try {

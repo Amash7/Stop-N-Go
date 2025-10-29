@@ -6,6 +6,8 @@ import { products } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 
+export const dynamic = 'force-dynamic';
+
 // GET all products (public)
 export async function GET() {
   try {

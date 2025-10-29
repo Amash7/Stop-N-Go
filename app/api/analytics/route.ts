@@ -5,6 +5,8 @@ import { db } from '@/lib/db';
 import { orders } from '@/lib/db/schema';
 import { sql, gte } from 'drizzle-orm';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
