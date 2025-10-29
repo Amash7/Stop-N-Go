@@ -30,7 +30,14 @@ export default function SignInPage() {
         toast.error('Invalid email or password');
       } else {
         toast.success('Welcome back!');
-        router.push('/products');
+        // Redirect based on user role
+        const sessionRes = await fetch('/api/auth/session');
+        const session = await sessionRes.json();
+        if (session?.user?.role === 'admin') {
+          router.push('/admin');
+        } else {
+          router.push('/products');
+        }
         router.refresh();
       }
     } catch (error) {
